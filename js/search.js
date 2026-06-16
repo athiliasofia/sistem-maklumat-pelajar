@@ -1,15 +1,18 @@
 let users = [];
 
-// Load user data on page load
+// Load user data on page load (from localStorage + API)
 window.onload = async function() {
     try {
-        console.log("Memuatkan data pelajar dari API...");
-        users = await apiService.getUsers();
+        console.log("Memuatkan data pelajar dari API dan localStorage...");
+        users = await apiService.getAllRegisteredUsers();
+        
+        // Get registered users count
+        const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
         
         // Show loading message
         const outputDiv = document.getElementById("output");
         if (outputDiv) {
-            outputDiv.innerHTML = `<div class="message success show">✓ Data pelajar berjaya dimuat (${users.length} rekod tersedia)</div>`;
+            outputDiv.innerHTML = `<div class="message success show">✓ Data pelajar berjaya dimuat (${users.length} rekod - ${registeredUsers.length} dipendaftarkan secara lokal)</div>`;
         }
     } catch (error) {
         const outputDiv = document.getElementById("output");
@@ -44,14 +47,14 @@ function cariData() {
         return;
     }
     
-    // Search for matching users
+    // Search for matching users (using combined data)
     const lowerKeyword = keyword.toLowerCase();
     const hasil = users.filter(user =>
-        user.name.toLowerCase().includes(lowerKeyword) ||
-        user.email.toLowerCase().includes(lowerKeyword) ||
-        user.username.toLowerCase().includes(lowerKeyword) ||
+        (user.name && user.name.toLowerCase().includes(lowerKeyword)) ||
+        (user.username && user.username.toLowerCase().includes(lowerKeyword)) ||
+        (user.email && user.email.toLowerCase().includes(lowerKeyword)) ||
         (user.phone && user.phone.includes(keyword)) ||
-        (user.company && user.company.name.toLowerCase().includes(lowerKeyword))
+        (user.company && user.company.name && user.company.name.toLowerCase().includes(lowerKeyword))
     );
     
     // Display results

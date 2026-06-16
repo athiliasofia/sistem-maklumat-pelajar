@@ -4,6 +4,20 @@ function validateEmail(email) {
     return pattern.test(email);
 }
 
+// Username Validation
+function validateUsername(username) {
+    if (!username || username.trim() === '') {
+        return { valid: false, error: 'Nama pengguna adalah wajib' };
+    }
+    if (username.trim().length < 3) {
+        return { valid: false, error: 'Nama pengguna mesti sekurang-kurangnya 3 karakter' };
+    }
+    if (!/^[a-zA-Z0-9_-]+$/i.test(username)) {
+        return { valid: false, error: 'Nama pengguna hanya boleh mengandungi huruf, angka, "-" dan "_"' };
+    }
+    return { valid: true, error: '' };
+}
+
 // Nama/Name Validation
 function validateNama(nama) {
     if (!nama || nama.trim() === '') {
@@ -133,6 +147,7 @@ function setupRealtimeValidation(fieldId, validationFunction) {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         validateEmail,
+        validateUsername,
         validateNama,
         validatePassword,
         validatePasswordMatch,

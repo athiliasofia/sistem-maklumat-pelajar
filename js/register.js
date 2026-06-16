@@ -1,15 +1,23 @@
 // Register function with comprehensive validation
-function daftar() {
+async function daftar() {
     // Clear previous errors and messages
     clearAllErrors();
     
     // Get form values
+    const username = document.getElementById("username").value.trim();
     const nama = document.getElementById("nama").value.trim();
     const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
-    const passwordConfirm = document.getElementById("passwordConfirm").value;
     
     let isValid = true;
+    
+    // Validate Username
+    const usernameValidation = validateUsername(username);
+    if (!usernameValidation.valid) {
+        showFieldError("username", usernameValidation.error);
+        isValid = false;
+    } else {
+        clearFieldError("username");
+    }
     
     // Validate Nama
     const namaValidation = validateNama(nama);
@@ -31,64 +39,89 @@ function daftar() {
         clearFieldError("email");
     }
     
-    // Validate Password
-    const passwordValidation = validatePassword(password);
-    if (!passwordValidation.valid) {
-        showFieldError("password", passwordValidation.error);
-        isValid = false;
-    } else {
-        clearFieldError("password");
-    }
-    
-    // Validate Password Match
-    const passwordMatchValidation = validatePasswordMatch(password, passwordConfirm);
-    if (!passwordMatchValidation.valid) {
-        showFieldError("passwordConfirm", passwordMatchValidation.error);
-        isValid = false;
-    } else {
-        clearFieldError("passwordConfirm");
-    }
-    
     // If validation fails, show error message
     if (!isValid) {
-        showMessage("mesej", "Sila betulkan ralat-ralat di atas", "error");
+        showMessage("mesej", "⚠ Sila betulkan ralat-ralat di atas", "error");
         return;
     }
     
-    // All validations passed
-    const button = event.target;
+    // All validations passed - POST to API
+    const button = document.querySelector('button');
     button.disabled = true;
+    const originalText = button.textContent;
     button.textContent = "Sedang Mendaftar...";
     
-    // Simulate API call
-    setTimeout(() => {
-        showMessage("mesej", "✓ Pendaftaran berjaya! Log masuk dengan akaun anda.", "success");
+    try {
+        // Prepare user data
+        const userData = {
+            username: username,
+            name: nama,
+            email: email
+        };
+        
+        // POST to API
+        const response = await apiService.createUser(userData);
+        console.log("User created on API:", response);
+        
+        // Save to localStorage as well (for persistence in this browser)
+        const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+        registeredUsers.push(userData);
+        localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+        console.log("User saved to localStorage:", userData);
+        
+        showMessage("mesej", "✓ Pendaftaran berjaya! Data disimpan ke sistem.", "success");
         
         // Clear form
+        document.getElementById("username").value = "";
         document.getElementById("nama").value = "";
         document.getElementById("email").value = "";
-        document.getElementById("password").value = "";
-        document.getElementById("passwordConfirm").value = "";
         
         // Reset button
         button.disabled = false;
-        button.textContent = "Daftar";
+        button.textContent = originalText;
         
-        // Simulate redirect after 2 seconds
-        // setTimeout(() => {
-        //     window.location.href = "login.html";
-        // }, 2000);
-    }, 1000);
+        // Optional: Redirect after 2 seconds
+        setTimeout(() => {
+            window.location.href = "login.html";
+        }, 2000);
+        
+    } catch (error) {
+        showMessage("mesej", "❌ Ralat mendaftar: " + error.message, "error");
+        console.error("Registration error:", error);
+        
+        // Reset button
+        button.disabled = false;
+        button.textContent = originalText;
+    }
 }
 
 // Real-time validation setup
 document.addEventListener('DOMContentLoaded', function() {
+    const usernameInput = document.getElementById('username');
     const namaInput = document.getElementById('nama');
     const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
-    const passwordConfirmInput = document.getElementById('passwordConfirm');
     
-    // Real-time validation on blur
+    // Username validation
+    if (usernameInput) {
+        usernameInput.addEventListener('blur', function() {
+            if (this.value.trim() !== '') {
+                const result = validateUsername(this.value);
+                if (!result.valid) {
+                    showFieldError('username', result.error);
+                } else {
+                    clearFieldError('username');
+                }
+            }
+        });
+        
+        usernameInput.addEventListener('focus', function() {
+            if (this.classList.contains('error')) {
+                clearFieldError('username');
+            }
+        });
+    }
+    
+    // Nama validation
     if (namaInput) {
         namaInput.addEventListener('blur', function() {
             if (this.value.trim() !== '') {
@@ -108,6 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Email validation
     if (emailInput) {
         emailInput.addEventListener('blur', function() {
             if (this.value.trim() !== '') {
@@ -122,44 +156,6 @@ document.addEventListener('DOMContentLoaded', function() {
         emailInput.addEventListener('focus', function() {
             if (this.classList.contains('error')) {
                 clearFieldError('email');
-            }
-        });
-    }
-    
-    if (passwordInput) {
-        passwordInput.addEventListener('blur', function() {
-            if (this.value !== '') {
-                const result = validatePassword(this.value);
-                if (!result.valid) {
-                    showFieldError('password', result.error);
-                } else {
-                    clearFieldError('password');
-                }
-            }
-        });
-        
-        passwordInput.addEventListener('focus', function() {
-            if (this.classList.contains('error')) {
-                clearFieldError('password');
-            }
-        });
-    }
-    
-    if (passwordConfirmInput) {
-        passwordConfirmInput.addEventListener('blur', function() {
-            if (this.value !== '' && passwordInput.value !== '') {
-                const result = validatePasswordMatch(passwordInput.value, this.value);
-                if (!result.valid) {
-                    showFieldError('passwordConfirm', result.error);
-                } else {
-                    clearFieldError('passwordConfirm');
-                }
-            }
-        });
-        
-        passwordConfirmInput.addEventListener('focus', function() {
-            if (this.classList.contains('error')) {
-                clearFieldError('passwordConfirm');
             }
         });
     }
