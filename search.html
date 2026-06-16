@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carian Pelajar</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<header>
+<nav>
+<div class="logo">Sistem Maklumat Pelajar</div>
+<div class="menu">
+<a href="index.html">Utama</a>
+<a href="register.html">Daftar</a>
+<a href="login.html">Log Masuk</a>
+<a href="search.html" class="active">Carian</a>
+</div>
+</nav>
+</header>
+
+<div class="container">
+<div class="card">
+<h2>Carian Pelajar</h2>
+
+<div class="form-group">
+<label for="keyword">Cari Nama atau ID Pelajar</label>
+<input
+type="text"
+id="keyword"
+placeholder="Masukkan nama atau ID pelajar"
+required>
+<div class="error-text" id="keywordError"></div>
+</div>
+
+<button onclick="cariData()">Cari</button>
+
+<div id="output"></div>
+
+</div>
+</div>
+
+<script src="js/api-config.js"></script>
+<script src="js/validation.js"></script>
+<script src="js/search.js"></script>
+<script src="js/navigation.js"></script>
+
+</body>
+</html>
